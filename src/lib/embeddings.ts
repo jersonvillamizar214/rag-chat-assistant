@@ -1,4 +1,4 @@
-import { pipeline, type FeatureExtractionPipeline } from "@xenova/transformers";
+import type { FeatureExtractionPipeline } from "@xenova/transformers";
 
 // all-MiniLM-L6-v2 → 384-dimensional sentence embeddings.
 // Runs locally in Node (ONNX), so no embeddings API key or cost.
@@ -7,9 +7,13 @@ export const EMBEDDING_DIM = 384;
 
 let extractorPromise: Promise<FeatureExtractionPipeline> | null = null;
 
-// The model is loaded once and reused — loading it per request would be slow.
-function getExtractor() {
-  extractorPromise ??= pipeline("feature-extraction", EMBEDDING_MODEL);
+// Imported dynamically and only once: loading the native ONNX runtime at module
+// scope would run during `next build` (and fail there), even though it's only
+// ever needed to serve a request.
+function getExtractor(): Promise<FeatureExtractionPipeline> {
+  extractorPromise ??= import("@xenova/transformers").then(({ pipeline }) =>
+    pipeline("feature-extraction", EMBEDDING_MODEL)
+  );
   return extractorPromise;
 }
 
