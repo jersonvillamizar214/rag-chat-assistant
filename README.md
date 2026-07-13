@@ -1,36 +1,84 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Chat empresarial con RAG
 
-## Getting Started
+An enterprise assistant that answers **only** from the company's own documentation. It performs real **semantic search** over a vector store and grounds the LLM's answer in the retrieved passages — every reply shows the sources it used, and it refuses to answer when the information isn't there.
 
-First, run the development server:
+> Part of my developer portfolio. Runs entirely on free tiers: local embeddings, Groq's free API, and PostgreSQL.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Why this is real RAG (and not a chatbot with a prompt)
+
+| Guarantee | How |
+| --- | --- |
+| **No hallucinations** | The system prompt forbids answering outside the retrieved context. Asked something absent from the docs, it replies *"No tengo esa información en la documentación de Copower."* |
+| **Verifiable** | Every answer ships the retrieved chunks with their cosine-similarity scores, shown in the UI. |
+| **Semantic, not keyword** | Questions are embedded into 384-d vectors and matched by cosine distance in `pgvector` — a question phrased differently still finds the right passage. |
+
+## The pipeline
+
+```
+Pregunta
+   │
+   ▼
+[1 · RETRIEVE]  transformers.js embeds the question (384-d)
+   │            → pgvector: ORDER BY embedding <=> query  (HNSW index, cosine)
+   │            → top-4 chunks above a similarity threshold
+   ▼
+[2 · AUGMENT]   retrieved chunks injected into the prompt as CONTEXT
+   │            + strict grounding rules ("only use the context, never invent")
+   ▼
+[3 · GENERATE]  Groq · Llama 3.3 70B writes the answer, streamed token by token
+   │
+   ▼
+Respuesta + fuentes citadas
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Tech Stack
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| Piece | Choice | Why |
+| --- | --- | --- |
+| Framework | Next.js 16 (App Router) | Frontend + API in one deploy |
+| Embeddings | `transformers.js` · all-MiniLM-L6-v2 | Runs locally in Node — **no API key, no cost** |
+| Vector store | PostgreSQL + **pgvector** (HNSW) | Real vector search; Neon supports it on the free tier |
+| LLM | **Groq** · Llama 3.3 70B | Free tier, very fast inference, streaming |
+| Styling | Tailwind CSS v4 | — |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Knowledge base
 
-## Learn More
+Four markdown documents for the fictional retailer **Copower** (`content/`): shipping, returns & warranty, payment methods, and company info. The ingest script chunks them by section (with overlap), embeds each chunk, and stores it in `pgvector` — **25 chunks** in total.
 
-To learn more about Next.js, take a look at the following resources:
+To use your own knowledge base, drop your `.md` files into `content/` and re-run the ingest.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Run locally
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Requires Node 20+, Docker, and a free [Groq API key](https://console.groq.com).
 
-## Deploy on Vercel
+```bash
+npm install
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+cp .env.example .env      # add your GROQ_API_KEY
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+# PostgreSQL with pgvector (host port 5434)
+docker compose up -d
+
+# Chunk → embed → store (downloads the embedding model on first run)
+npm run ingest
+
+npm run dev               # http://localhost:3000
+```
+
+## Verified behaviour
+
+| Question | Answer |
+| --- | --- |
+| *¿Cuántos días tengo para devolver un producto?* | "30 días calendario… excepto Belleza, que es de 10 días." ✅ |
+| *¿Cuánto cuesta el envío express?* | "19 USD, sin importar el valor de la compra." ✅ |
+| *¿Cuál es el salario del CEO?* | "No tengo esa información en la documentación de Copower." ✅ |
+
+## Deploy (Vercel + Neon)
+
+1. Create a Postgres database on [neon.tech](https://neon.tech) and enable `pgvector` (`CREATE EXTENSION vector;`).
+2. Run `npm run ingest` against the Neon `DATABASE_URL` to populate the vector store.
+3. Import the repo into Vercel and set `DATABASE_URL`, `GROQ_API_KEY` and `GROQ_MODEL`.
+
+## License
+
+MIT

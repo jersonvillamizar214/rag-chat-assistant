@@ -1,0 +1,17 @@
+services:
+  db:
+    # pgvector image = Postgres 16 with the `vector` extension preinstalled.
+    image: pgvector/pgvector:pg16
+    container_name: rag_chat_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ragdb
+    ports:
+      - "5434:5432" # host 5434 to avoid clashing with other local Postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
