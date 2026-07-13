@@ -18,7 +18,7 @@ Los productos personalizados o hechos a la medida **no admiten devolución por r
 
 ## Costos de la devolución
 
-- Si la devolución es por **defecto de fábrica o error de Copower**, la empresa asume el 100% del costo de recogida.
+- Si la devolución es por **defecto de fábrica o error de Northwind**, la empresa asume el 100% del costo de recogida.
 - Si la devolución es por **retracto del cliente**, el cliente asume el costo de transporte, que es de **12 USD**.
 
 ## Reembolsos
@@ -35,6 +35,6 @@ La garantía **no cubre**: daños por mal uso, caídas, contacto con líquidos, 
 
 ## Cómo solicitar una devolución o garantía
 
-1. Escribir a soporte@copower.example indicando el número de pedido.
+1. Escribir a soporte@northwind.example indicando el número de pedido.
 2. Adjuntar fotos o video del producto si se trata de un defecto.
-3. Copower responde en un máximo de **2 días hábiles** con la autorización y la guía de recogida.
+3. Northwind responde en un máximo de **2 días hábiles** con la autorización y la guía de recogida.

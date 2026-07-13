@@ -11,11 +11,11 @@ No aceptamos criptomonedas ni cheques.
 
 ## Cuotas y financiación
 
-Las compras superiores a **100 USD** pueden diferirse hasta en **12 cuotas** con tarjeta de crédito. Los intereses los define el banco emisor, no Copower.
+Las compras superiores a **100 USD** pueden diferirse hasta en **12 cuotas** con tarjeta de crédito. Los intereses los define el banco emisor, no Northwind.
 
 ## Seguridad
 
-Copower **no almacena** los datos de las tarjetas. El procesamiento se realiza a través de una pasarela de pagos certificada **PCI-DSS**. Todas las transacciones viajan cifradas con TLS.
+Northwind **no almacena** los datos de las tarjetas. El procesamiento se realiza a través de una pasarela de pagos certificada **PCI-DSS**. Todas las transacciones viajan cifradas con TLS.
 
 ## Facturación
 
@@ -23,4 +23,4 @@ La factura electrónica se envía al correo registrado dentro de las **24 horas*
 
 ## Cobros no reconocidos
 
-Ante un cobro no reconocido, el cliente debe escribir a pagos@copower.example dentro de los **60 días** siguientes al cargo. Copower inicia la investigación y responde en un plazo máximo de **15 días hábiles**.
+Ante un cobro no reconocido, el cliente debe escribir a pagos@northwind.example dentro de los **60 días** siguientes al cargo. Northwind inicia la investigación y responde en un plazo máximo de **15 días hábiles**.

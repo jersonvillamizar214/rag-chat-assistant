@@ -10,7 +10,7 @@ An enterprise assistant that answers **only** from the company's own documentati
 
 | Guarantee | How |
 | --- | --- |
-| **No hallucinations** | The system prompt forbids answering outside the retrieved context. Asked something absent from the docs, it replies *"No tengo esa información en la documentación de Copower."* |
+| **No hallucinations** | The system prompt forbids answering outside the retrieved context. Asked something absent from the docs, it replies *"No tengo esa información en la documentación de Northwind."* |
 | **Verifiable** | Every answer ships the retrieved chunks with their cosine-similarity scores, shown in the UI. |
 | **Semantic, not keyword** | Questions are embedded into 384-d vectors and matched by cosine distance in `pgvector` — a question phrased differently still finds the right passage. |
 
@@ -45,7 +45,7 @@ Respuesta + fuentes citadas
 
 ## Knowledge base
 
-Four markdown documents for the fictional retailer **Copower** (`content/`): shipping, returns & warranty, payment methods, and company info. The ingest script chunks them by section (with overlap), embeds each chunk, and stores it in `pgvector` — **25 chunks** in total.
+Four markdown documents for the fictional retailer **Northwind** (`content/`): shipping, returns & warranty, payment methods, and company info. The ingest script chunks them by section (with overlap), embeds each chunk, and stores it in `pgvector` — **25 chunks** in total.
 
 To use your own knowledge base, drop your `.md` files into `content/` and re-run the ingest.
 
@@ -73,7 +73,7 @@ npm run dev               # http://localhost:3000
 | --- | --- |
 | *¿Cuántos días tengo para devolver un producto?* | "30 días calendario… excepto Belleza, que es de 10 días." ✅ |
 | *¿Cuánto cuesta el envío express?* | "19 USD, sin importar el valor de la compra." ✅ |
-| *¿Cuál es el salario del CEO?* | "No tengo esa información en la documentación de Copower." ✅ |
+| *¿Cuál es el salario del CEO?* | "No tengo esa información en la documentación de Northwind." ✅ |
 
 ## Deploy (Vercel + Neon)
 

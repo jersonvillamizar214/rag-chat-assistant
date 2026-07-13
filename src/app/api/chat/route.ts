@@ -24,11 +24,11 @@ interface ChatMessage {
 
 // The grounding rules are what make this RAG rather than a plain chatbot:
 // the model may only use the retrieved context, and must say so when it can't.
-const SYSTEM_PROMPT = `Eres el asistente virtual de Copower, una tienda de comercio electrónico.
+const SYSTEM_PROMPT = `Eres el asistente virtual de Northwind, una tienda de comercio electrónico.
 
 Reglas estrictas:
 - Responde ÚNICAMENTE con información del CONTEXTO que se te entrega.
-- Si el contexto no contiene la respuesta, di exactamente: "No tengo esa información en la documentación de Copower." No inventes datos.
+- Si el contexto no contiene la respuesta, di exactamente: "No tengo esa información en la documentación de Northwind." No inventes datos.
 - No inventes precios, plazos, correos ni políticas que no aparezcan en el contexto.
 - Responde en español, de forma breve y concreta (máximo 5 frases).
 - Cuando cites un dato (un plazo, un costo), menciónalo con precisión tal como aparece.`;

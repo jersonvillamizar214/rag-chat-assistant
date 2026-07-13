@@ -75,7 +75,7 @@ export default function Home() {
       </section>
 
       <footer className="mt-14 border-t border-white/10 pt-8 text-center text-sm text-slate-500">
-        Base de conocimiento: documentación ficticia de Copower (envíos, devoluciones,
+        Base de conocimiento: documentación ficticia de Northwind (envíos, devoluciones,
         garantía, pagos) —{" "}
         <a
           href="https://github.com/jersonvillamizar214"

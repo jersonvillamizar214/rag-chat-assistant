@@ -84,7 +84,7 @@ export default function Chat() {
             <div className="grid h-12 w-12 place-items-center rounded-xl bg-violet-500/15 text-2xl">
               🤖
             </div>
-            <p className="mt-4 font-medium text-white">Asistente de Copower</p>
+            <p className="mt-4 font-medium text-white">Asistente de Northwind</p>
             <p className="mt-1 max-w-sm text-sm text-slate-400">
               Pregunta sobre envíos, devoluciones, garantía o pagos. Solo respondo con
               la documentación oficial.

@@ -20,7 +20,7 @@ const CASES = [
   },
   {
     question: "¿En qué año se fundó la empresa?",
-    expect: "sobre-copower.md",
+    expect: "sobre-northwind.md",
   },
 ];
 

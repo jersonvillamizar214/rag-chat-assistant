@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Copower AI — Chat empresarial con RAG",
+  title: "Northwind AI — Chat empresarial con RAG",
   description:
     "Asistente empresarial con RAG: búsqueda semántica sobre documentación interna (pgvector) + generación con Groq.",
 };

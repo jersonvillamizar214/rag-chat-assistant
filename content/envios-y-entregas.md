@@ -2,7 +2,7 @@
 
 ## Cobertura
 
-Copower despacha a Colombia, México, Chile, Argentina, Perú y España. No realizamos envíos a zonas rurales sin cobertura de nuestras transportadoras aliadas.
+Northwind despacha a Colombia, México, Chile, Argentina, Perú y España. No realizamos envíos a zonas rurales sin cobertura de nuestras transportadoras aliadas.
 
 ## Tiempos de entrega
 
@@ -26,4 +26,4 @@ Al despachar el pedido enviamos un correo con el número de guía. El seguimient
 
 ## Pedido no recibido
 
-Si el pedido supera en más de 5 días hábiles el tiempo estimado de entrega, el cliente puede abrir un reclamo. Copower reenvía el pedido sin costo o reembolsa el 100% del valor pagado, a elección del cliente.
+Si el pedido supera en más de 5 días hábiles el tiempo estimado de entrega, el cliente puede abrir un reclamo. Northwind reenvía el pedido sin costo o reembolsa el 100% del valor pagado, a elección del cliente.
