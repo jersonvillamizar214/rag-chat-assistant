@@ -1,0 +1,77 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  quality:
+    name: Lint & Build
+    runs-on: ubuntu-latest
+    # No real secrets needed: the Groq client is created lazily, on first request.
+    env:
+      DATABASE_URL: postgresql://user:pass@localhost:5432/ragdb
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build (type-check included)
+        run: npm run build
+
+  rag-smoke:
+    name: Ingest against pgvector
+    runs-on: ubuntu-latest
+    # Prove the RAG pipeline's retrieval half works: real pgvector, real embeddings.
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: ragdb
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ragdb
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - run: npm ci
+
+      - name: Ingest documents (chunk → embed → pgvector)
+        run: npm run ingest
+
+      - name: Verify semantic retrieval
+        run: npx tsx scripts/verify-retrieval.ts
+
+  docker:
+    name: Docker image
+    needs: quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build image
+        run: docker build -t rag-chat-assistant:ci .

@@ -5,8 +5,17 @@ import { retrieve, MIN_SIMILARITY } from "@/lib/retrieve";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 const MODEL = process.env.GROQ_MODEL ?? "llama-3.3-70b-versatile";
+
+// Created on first request, not at import time — otherwise a build without
+// GROQ_API_KEY (e.g. in CI) would fail while loading this module.
+let client: Groq | null = null;
+function getGroq(): Groq {
+  const apiKey = process.env.GROQ_API_KEY;
+  if (!apiKey) throw new Error("Falta GROQ_API_KEY");
+  client ??= new Groq({ apiKey });
+  return client;
+}
 
 interface ChatMessage {
   role: "user" | "assistant";
@@ -61,7 +70,7 @@ export async function POST(req: Request) {
       content: m.content,
     }));
 
-    const completion = await groq.chat.completions.create({
+    const completion = await getGroq().chat.completions.create({
       model: MODEL,
       temperature: 0.2, // low → factual, less creative
       max_tokens: 500,

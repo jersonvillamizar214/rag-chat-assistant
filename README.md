@@ -1,5 +1,7 @@
 # Chat empresarial con RAG
 
+[![CI](https://github.com/jersonvillamizar214/rag-chat-assistant/actions/workflows/ci.yml/badge.svg)](https://github.com/jersonvillamizar214/rag-chat-assistant/actions/workflows/ci.yml)
+
 An enterprise assistant that answers **only** from the company's own documentation. It performs real **semantic search** over a vector store and grounds the LLM's answer in the retrieved passages — every reply shows the sources it used, and it refuses to answer when the information isn't there.
 
 > Part of my developer portfolio. Runs entirely on free tiers: local embeddings, Groq's free API, and PostgreSQL.
