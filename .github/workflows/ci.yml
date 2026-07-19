@@ -50,6 +50,8 @@ jobs:
           --health-retries 10
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ragdb
+      # Embeddings run through Google's API; the key is a repo secret.
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
     steps:
       - uses: actions/checkout@v4
 
@@ -60,10 +62,14 @@ jobs:
 
       - run: npm ci
 
+      # Skip when the secret isn't configured (e.g. on a fork), so external PRs
+      # don't fail on a missing key.
       - name: Ingest documents (chunk → embed → pgvector)
+        if: env.GEMINI_API_KEY != ''
         run: npm run ingest
 
       - name: Verify semantic retrieval
+        if: env.GEMINI_API_KEY != ''
         run: npx tsx scripts/verify-retrieval.ts
 
   docker:

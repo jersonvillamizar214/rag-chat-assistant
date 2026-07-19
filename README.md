@@ -4,7 +4,7 @@
 
 An enterprise assistant that answers **only** from the company's own documentation. It performs real **semantic search** over a vector store and grounds the LLM's answer in the retrieved passages — every reply shows the sources it used, and it refuses to answer when the information isn't there.
 
-> Part of my developer portfolio. Runs entirely on free tiers: local embeddings, Groq's free API, and PostgreSQL.
+> Part of my developer portfolio. Runs entirely on free tiers: Google's embeddings, Groq's LLM, and PostgreSQL with pgvector.
 
 ## Why this is real RAG (and not a chatbot with a prompt)
 
@@ -20,7 +20,7 @@ An enterprise assistant that answers **only** from the company's own documentati
 Pregunta
    │
    ▼
-[1 · RETRIEVE]  transformers.js embeds the question (384-d)
+[1 · RETRIEVE]  Gemini embeds the question (768-d)
    │            → pgvector: ORDER BY embedding <=> query  (HNSW index, cosine)
    │            → top-4 chunks above a similarity threshold
    ▼
@@ -38,7 +38,7 @@ Respuesta + fuentes citadas
 | Piece | Choice | Why |
 | --- | --- | --- |
 | Framework | Next.js 16 (App Router) | Frontend + API in one deploy |
-| Embeddings | `transformers.js` · all-MiniLM-L6-v2 | Runs locally in Node — **no API key, no cost** |
+| Embeddings | **Google** `gemini-embedding-001` (768-d) | Hosted, multilingual, free tier — a plain HTTPS call, so it runs on Vercel's serverless runtime |
 | Vector store | PostgreSQL + **pgvector** (HNSW) | Real vector search; Neon supports it on the free tier |
 | LLM | **Groq** · Llama 3.3 70B | Free tier, very fast inference, streaming |
 | Styling | Tailwind CSS v4 | — |
@@ -51,17 +51,17 @@ To use your own knowledge base, drop your `.md` files into `content/` and re-run
 
 ## Run locally
 
-Requires Node 20+, Docker, and a free [Groq API key](https://console.groq.com).
+Requires Node 20+, Docker, a free [Groq API key](https://console.groq.com) and a free [Gemini API key](https://aistudio.google.com/apikey).
 
 ```bash
 npm install
 
-cp .env.example .env      # add your GROQ_API_KEY
+cp .env.example .env      # add GROQ_API_KEY and GEMINI_API_KEY
 
 # PostgreSQL with pgvector (host port 5434)
 docker compose up -d
 
-# Chunk → embed → store (downloads the embedding model on first run)
+# Chunk → embed (Gemini) → store in pgvector
 npm run ingest
 
 npm run dev               # http://localhost:3000
@@ -77,9 +77,9 @@ npm run dev               # http://localhost:3000
 
 ## Deploy (Vercel + Neon)
 
-1. Create a Postgres database on [neon.tech](https://neon.tech) and enable `pgvector` (`CREATE EXTENSION vector;`).
-2. Run `npm run ingest` against the Neon `DATABASE_URL` to populate the vector store.
-3. Import the repo into Vercel and set `DATABASE_URL`, `GROQ_API_KEY` and `GROQ_MODEL`.
+1. Create a Postgres database on [neon.tech](https://neon.tech). The ingest script enables `pgvector` automatically.
+2. Run `npm run ingest` against the Neon `DATABASE_URL` (with `GEMINI_API_KEY` set) to populate the vector store.
+3. Import the repo into Vercel and set `DATABASE_URL`, `GROQ_API_KEY`, `GROQ_MODEL` and `GEMINI_API_KEY`.
 
 ## License
 

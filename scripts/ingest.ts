@@ -88,7 +88,7 @@ async function main() {
     const chunks = chunkMarkdown(file, raw);
 
     for (const chunk of chunks) {
-      const vector = await embed(chunk.content);
+      const vector = await embed(chunk.content, "RETRIEVAL_DOCUMENT");
       await pool.query(
         `INSERT INTO documents (source, title, chunk_index, content, embedding)
          VALUES ($1, $2, $3, $4, $5::vector)`,

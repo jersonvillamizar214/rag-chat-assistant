@@ -1,27 +1,51 @@
-import type { FeatureExtractionPipeline } from "@xenova/transformers";
+// Embeddings via Google's gemini-embedding-001 — a hosted, multilingual model on
+// the free tier. Being a plain HTTPS call (no native binaries), it runs anywhere
+// the app does, including Vercel's serverless runtime, which the previous local
+// ONNX model could not.
 
-// all-MiniLM-L6-v2 → 384-dimensional sentence embeddings.
-// Runs locally in Node (ONNX), so no embeddings API key or cost.
-export const EMBEDDING_MODEL = "Xenova/all-MiniLM-L6-v2";
-export const EMBEDDING_DIM = 384;
+export const EMBEDDING_MODEL = "gemini-embedding-001";
+export const EMBEDDING_DIM = 768; // the model's full size is 3072; 768 is plenty here
 
-let extractorPromise: Promise<FeatureExtractionPipeline> | null = null;
+const ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${EMBEDDING_MODEL}:embedContent`;
 
-// Imported dynamically and only once: loading the native ONNX runtime at module
-// scope would run during `next build` (and fail there), even though it's only
-// ever needed to serve a request.
-function getExtractor(): Promise<FeatureExtractionPipeline> {
-  extractorPromise ??= import("@xenova/transformers").then(({ pipeline }) =>
-    pipeline("feature-extraction", EMBEDDING_MODEL)
-  );
-  return extractorPromise;
+// gemini-embedding-001 is asymmetric: documents and queries are embedded with
+// different task types so a question lands near the passages that answer it.
+export type TaskType = "RETRIEVAL_DOCUMENT" | "RETRIEVAL_QUERY";
+
+// Reduced-dimension outputs (< 3072) are returned un-normalized, so we L2-
+// normalize here — that turns cosine similarity into a plain dot product and
+// keeps distances comparable across vectors.
+function normalize(v: number[]): number[] {
+  const norm = Math.hypot(...v);
+  return norm === 0 ? v : v.map((x) => x / norm);
 }
 
-export async function embed(text: string): Promise<number[]> {
-  const extractor = await getExtractor();
-  // Mean pooling + L2 normalize → cosine similarity becomes a dot product.
-  const output = await extractor(text, { pooling: "mean", normalize: true });
-  return Array.from(output.data as Float32Array);
+export async function embed(
+  text: string,
+  taskType: TaskType = "RETRIEVAL_QUERY"
+): Promise<number[]> {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) throw new Error("Falta GEMINI_API_KEY");
+
+  const res = await fetch(`${ENDPOINT}?key=${apiKey}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: `models/${EMBEDDING_MODEL}`,
+      content: { parts: [{ text }] },
+      taskType,
+      outputDimensionality: EMBEDDING_DIM,
+    }),
+  });
+
+  if (!res.ok) {
+    throw new Error(`Gemini embeddings ${res.status}: ${await res.text()}`);
+  }
+
+  const data = (await res.json()) as { embedding?: { values?: number[] } };
+  const values = data.embedding?.values;
+  if (!values?.length) throw new Error("Gemini devolvió un embedding vacío");
+  return normalize(values);
 }
 
 // pgvector accepts a vector literal like '[0.1,0.2,...]'.
